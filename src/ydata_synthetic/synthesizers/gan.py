@@ -70,5 +70,4 @@ class Model():
             except:
                 # Invalid device or cannot modify virtual devices once initialized.
                 pass
-        synth = load(path)
-        return synth
+        return load(path)

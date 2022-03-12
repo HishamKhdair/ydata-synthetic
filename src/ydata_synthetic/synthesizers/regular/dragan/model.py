@@ -34,8 +34,7 @@ class DRAGAN(gan.Model):
         self.d_optimizer = Adam(self.lr, beta_1=self.beta_1, beta_2=self.beta_2, clipvalue=0.001)
 
     def gradient_penalty(self, real, fake):
-        gp = gradient_penalty(self.discriminator, real, fake, mode='dragan')
-        return gp
+        return gradient_penalty(self.discriminator, real, fake, mode='dragan')
 
     def update_gradients(self, x):
         """
@@ -82,11 +81,9 @@ class DRAGAN(gan.Model):
         # gradient penalty
         gp = self.gradient_penalty(real, fake)
 
-        # getting the loss of the discriminator.
-        d_loss = (tf.reduce_mean(logits_fake)
+        return (tf.reduce_mean(logits_fake)
                   - tf.reduce_mean(logits_real)
                   + gp * self.gradient_penalty_weight)
-        return d_loss
 
     # generator loss
     def g_lossfn(self, real):
@@ -100,15 +97,12 @@ class DRAGAN(gan.Model):
 
         fake = self.generator(noise, training=True)
         logits_fake = self.discriminator(fake, training=True)
-        g_loss = -tf.reduce_mean(logits_fake)
-        return g_loss
+        return -tf.reduce_mean(logits_fake)
 
     def get_data_batch(self, train, batch_size):
         buffer_size = len(train)
-        #tensor_data = pd.concat([x_train, y_train], axis=1)
-        train_loader = tf.data.Dataset.from_tensor_slices(train) \
+        return tf.data.Dataset.from_tensor_slices(train) \
             .batch(batch_size).shuffle(buffer_size)
-        return train_loader
 
     def train_step(self, train_data):
         d_loss, g_loss = self.update_gradients(train_data)
@@ -127,10 +121,7 @@ class DRAGAN(gan.Model):
                     batch_data = tf.cast(batch_data, dtype=tf.float32)
                     d_loss, g_loss = self.train_step(batch_data)
 
-                    print(
-                        "Iteration: {} | disc_loss: {} | gen_loss: {}".format(
-                            iteration, d_loss, g_loss
-                        ))
+                    print(f"Iteration: {iteration} | disc_loss: {d_loss} | gen_loss: {g_loss}")
 
                     if iteration % sample_interval == 0:
                         # Test here data generation step
